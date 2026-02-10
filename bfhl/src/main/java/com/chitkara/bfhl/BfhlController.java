@@ -145,7 +145,7 @@ public class BfhlController {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(
-                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_KEY
+                        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_KEY
                 ))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(reqBody))
