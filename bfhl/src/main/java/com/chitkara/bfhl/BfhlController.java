@@ -128,12 +128,12 @@ public class BfhlController {
         HttpClient client = HttpClient.newHttpClient();
 
         String body = """
-        {
-          "contents": [{
-            "parts": [{"text": "%s"}]
-          }]
-        }
-        """.formatted(question);
+    {
+      "contents": [{
+        "parts": [{"text": "%s"}]
+      }]
+    }
+    """.formatted(question);
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(
@@ -149,14 +149,13 @@ public class BfhlController {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.body());
 
-        return root
-                .get("candidates")
-                .get(0)
-                .get("content")
-                .get("parts")
-                .get(0)
-                .get("text")
-                .asText()
-                .split(" ")[0];
+        JsonNode textNode = root.at("/candidates/0/content/parts/0/text");
+
+        if (textNode.isMissingNode()) {
+            return "AI_RESPONSE_UNAVAILABLE";
+        }
+
+        return textNode.asText().split("\\s+")[0];
     }
+
 }
