@@ -125,13 +125,21 @@ public class BfhlController {
 
     private String askGemini(String question) throws Exception {
 
+        if (GEMINI_KEY == null || GEMINI_KEY.isEmpty()) {
+            return "GEMINI_KEY_NOT_SET";
+        }
+
         HttpClient client = HttpClient.newHttpClient();
 
-        String body = """
+        String reqBody = """
     {
-      "contents": [{
-        "parts": [{"text": "%s"}]
-      }]
+      "contents": [
+        {
+          "parts": [
+            { "text": "%s" }
+          ]
+        }
+      ]
     }
     """.formatted(question);
 
@@ -140,7 +148,7 @@ public class BfhlController {
                         "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=" + GEMINI_KEY
                 ))
                 .header("Content-Type", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(body))
+                .POST(HttpRequest.BodyPublishers.ofString(reqBody))
                 .build();
 
         HttpResponse<String> response =
@@ -149,13 +157,25 @@ public class BfhlController {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(response.body());
 
-        JsonNode textNode = root.at("/candidates/0/content/parts/0/text");
-
-        if (textNode.isMissingNode()) {
-            return "AI_RESPONSE_UNAVAILABLE";
+        // DEBUG SAFETY CHECK
+        if (!root.has("candidates")) {
+            return "NO_CANDIDATES_FROM_GEMINI";
         }
 
-        return textNode.asText().split("\\s+")[0];
+        JsonNode candidates = root.get("candidates");
+        if (candidates.size() == 0) {
+            return "EMPTY_CANDIDATES";
+        }
+
+        JsonNode parts = candidates.get(0)
+                .path("content")
+                .path("parts");
+
+        if (parts.isArray() && parts.size() > 0) {
+            return parts.get(0).path("text").asText();
+        }
+
+        return "INVALID_GEMINI_RESPONSE";
     }
 
 }
