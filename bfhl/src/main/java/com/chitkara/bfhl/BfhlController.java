@@ -19,7 +19,7 @@ public class BfhlController {
 
     @GetMapping("/health")
     public Map<String, Object> health() {
-        Map<String, Object> res = new HashMap<>();
+        Map<String, Object> res = new LinkedHashMap<>();
         res.put("is_success", true);
         res.put("official_email", OFFICIAL_EMAIL);
         return res;
@@ -108,12 +108,13 @@ public class BfhlController {
     }
 
     private Map<String, Object> success(Object data) {
-        Map<String, Object> res = new HashMap<>();
+        Map<String, Object> res = new LinkedHashMap<>();
         res.put("is_success", true);
         res.put("official_email", OFFICIAL_EMAIL);
         res.put("data", data);
         return res;
     }
+
 
     private ResponseEntity<?> error(HttpStatus status) {
         Map<String, Object> res = new HashMap<>();
